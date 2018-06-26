@@ -173,7 +173,6 @@ class BadgeInstanceManager(models.Manager):
         badgeclass = kwargs.pop('badgeclass', None)
         issuer = kwargs.pop('issuer', badgeclass.issuer)
 
-        # self.model would be a BadgeInstance
         new_instance = self.model(
             recipient_identifier=recipient_identifier,
             badgeclass=badgeclass,

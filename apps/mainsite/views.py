@@ -97,7 +97,7 @@ class AppleAppSiteAssociation(APIView):
 class LoginAndObtainAuthToken(ObtainAuthToken):
     serializer_class = VerifiedAuthTokenSerializer
 
-
+# TODO: 
 class SitewideActionForm(forms.Form):
     ACTION_CLEAR_CACHE = 'CLEAR_CACHE'
     ACTION_RESAVE_ELEMENTS = 'RESAVE_ELEMENTS'

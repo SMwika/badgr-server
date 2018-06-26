@@ -10,6 +10,7 @@ from requests import ConnectionError
 import openbadges_bakery
 
 import badgrlog
+from issuer.helpers import BadgeCheckHelper
 from issuer.models import BadgeClass, BadgeInstance
 from issuer.utils import CURRENT_OBI_VERSION
 from mainsite.celery import app
@@ -79,6 +80,44 @@ def rebake_assertion_image(self, assertion_entity_id=None, obi_version=CURRENT_O
         }
 
     assertion.rebake(obi_version=obi_version)
+
+    return {
+        'success': True
+    }
+
+@app.task(bind=True)
+def correct_issued_on_imported_assertions(self):
+    # get imported assertions
+    assertions = BadgeInstance.objects.filter(source_url__isnull=False)
+    for a in assertions:
+        print('Checking the following assertion:')
+        print(a)
+        compare_issued_and_created_dates_for_assertion.delay(a.entity_id)
+
+    return {
+        'success': True,
+        'message': "Enqueued {} imported assertions for correcting issuedOn field".format(len(assertions))
+    }
+
+@app.task(bind=True)
+def compare_issued_and_created_dates_for_assertion(self, assertion_entityid=None):
+    try:
+        assertion = BadgeInstance.cached.get(entity_id=assertion_entity_id)
+    except BadgeInstance.DoesNotExist as e:
+        return {
+            'success': False,
+            'error': "Unknown assertion entity_id={}".format(assertion_entity_id)
+        }
+
+    assertion_obo = BadgeCheckHelper.get_assertion_obo(assertion)
+    if assertion_obo == {}:
+        return {
+            'success': False,
+            'error': "Invalid assertion entity_id={}".format(assertion_entityid)
+        }
+
+    if assertion_obo['issuedOn'] != assertion.issued_on:
+        assertion.issued_on = assertion_obo['issuedOn']
 
     return {
         'success': True

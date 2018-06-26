@@ -91,6 +91,8 @@ class PublicAPITests(SetupIssuerHelper, BadgrTestCase):
 
             self.assertEqual(content['type'], 'Assertion')
 
+    # TODO: new tests for correct issued on and created on dates for badge instances with imported badgeclass-es
+
     def test_scrapers_get_html_stub(self):
         test_user = self.setup_user(authenticate=False)
         test_issuer = self.setup_issuer(owner=test_user)
