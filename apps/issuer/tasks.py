@@ -90,25 +90,30 @@ def rebake_assertion_image(self, assertion_entity_id=None, obi_version=CURRENT_O
 def correct_issued_on_imported_assertions(self):
     # get imported assertions
     assertions = BadgeInstance.objects.filter(source_url__isnull=False)
+    updated_assertions = []
     for a in assertions:
-        print(compare_issued_and_created_dates_for_assertion(a))
+        result = compare_issued_and_created_dates_for_assertion(a)
+        if result['updated']:
+            updated_assertions.append(a)
 
     return {
         'success': True,
-        'message': "Checked {} imported assertions for correcting issuedOn field".format(len(assertions))
+        'message': "Checked {} imported assertions for correcting issuedOn field".format(len(assertions)),
+        'updated assertions': updated_assertions
     }
 
 @app.task(bind=True)
 def compare_issued_and_created_dates_for_assertion(self, assertion):
-    # converting json string to dict
-    original_json = json.loads(assertion.original_json)
-    # converting string date to type datetime.datetime
-    original_issuedOn_date = aniso8601.parse_datetime(original_json['issuedOn'])
+    assertion_obo = BadgeCheckHelper.get_assertion_obo(assertion)
+    original_issuedOn_date = aniso8601.parse_datetime(assertion_obo['issuedOn'])
+    updated = False
 
     if original_issuedOn_date != assertion.issued_on:
         assertion.issued_on = original_issuedOn_date
         assertion.save()
+        updated = True
 
     return {
-        'success': True
+        'success': True,
+        'updated': updated
     }

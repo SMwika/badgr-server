@@ -195,9 +195,9 @@ class BadgeCheckHelper(object):
     @classmethod
     def get_assertion_obo(cls, badge_instance):
         try:
-            response = openbadges.verify(badge_instance.get_json(), recipient_profile=None, **cls.badgecheck_options())
+            response = openbadges.verify(badge_instance.source_url, recipient_profile=None, **cls.badgecheck_options())
         except ValueError as e:
-            raise ValidationError([{'name': "INVALID_BADGE", 'description': str(e)}])
+            print(ValidationError([{'name': "INVALID_BADGE", 'description': str(e)}]))
 
         report = response.get('report', {})
         is_valid = report.get('valid')
@@ -207,7 +207,7 @@ class BadgeCheckHelper(object):
 
             assertion_obo = first_node_match(graph, dict(type="Assertion"))
             if not assertion_obo:
-                raise ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an assertion"}])
+                print(ValidationError([{'name': "ASSERTION_NOT_FOUND", 'description': "Unable to find an assertion"}]))
             return assertion_obo
         else:
             return {}
