@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import json
+import aniso8601
 
 import requests
 from celery.utils.log import get_task_logger
@@ -90,34 +91,23 @@ def correct_issued_on_imported_assertions(self):
     # get imported assertions
     assertions = BadgeInstance.objects.filter(source_url__isnull=False)
     for a in assertions:
-        print('Checking the following assertion:')
-        print(a)
-        compare_issued_and_created_dates_for_assertion.delay(a.entity_id)
+        print(compare_issued_and_created_dates_for_assertion(a))
 
     return {
         'success': True,
-        'message': "Enqueued {} imported assertions for correcting issuedOn field".format(len(assertions))
+        'message': "Checked {} imported assertions for correcting issuedOn field".format(len(assertions))
     }
 
 @app.task(bind=True)
-def compare_issued_and_created_dates_for_assertion(self, assertion_entityid=None):
-    try:
-        assertion = BadgeInstance.cached.get(entity_id=assertion_entity_id)
-    except BadgeInstance.DoesNotExist as e:
-        return {
-            'success': False,
-            'error': "Unknown assertion entity_id={}".format(assertion_entity_id)
-        }
+def compare_issued_and_created_dates_for_assertion(self, assertion):
+    # converting json string to dict
+    original_json = json.loads(assertion.original_json)
+    # converting string date to type datetime.datetime
+    original_issuedOn_date = aniso8601.parse_datetime(original_json['issuedOn'])
 
-    assertion_obo = BadgeCheckHelper.get_assertion_obo(assertion)
-    if assertion_obo == {}:
-        return {
-            'success': False,
-            'error': "Invalid assertion entity_id={}".format(assertion_entityid)
-        }
-
-    if assertion_obo['issuedOn'] != assertion.issued_on:
-        assertion.issued_on = assertion_obo['issuedOn']
+    if original_issuedOn_date != assertion.issued_on:
+        assertion.issued_on = original_issuedOn_date
+        assertion.save()
 
     return {
         'success': True
