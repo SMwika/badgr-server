@@ -6,6 +6,8 @@ from django.conf.urls import url
 from badgeuser.api import BadgeUserToken, BadgeUserForgotPassword, BadgeUserEmailConfirm, BadgeUserDetail, \
     AccessTokenList, AccessTokenDetail
 
+from badgeuser.api_v1 import marketing_opted_in_users_csv_view
+
 urlpatterns = [
 
     url(r'^auth/token$', BadgeUserToken.as_view(), name='v2_api_auth_token'),
@@ -17,4 +19,5 @@ urlpatterns = [
 
     url(r'^users/(?P<entity_id>self)$', BadgeUserDetail.as_view(), name='v2_api_user_self'),
     url(r'^users/(?P<entity_id>[^/]+)$', BadgeUserDetail.as_view(), name='v2_api_user_detail'),
+    url(r'^opted-marketing$', marketing_opted_in_users_csv_view),
 ]
