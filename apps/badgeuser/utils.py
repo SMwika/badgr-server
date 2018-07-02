@@ -6,9 +6,6 @@ from django.template.loader import get_template
 
 from allauth.account.adapter import get_adapter
 
-from badgeuser.models import BadgeUser
-
-
 def notify_on_password_change(user, request=None):
     """
     Sends an email notification to a user's primary email address to notify them a password change was successful.

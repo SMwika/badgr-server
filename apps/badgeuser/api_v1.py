@@ -164,7 +164,8 @@ def get_marketing_opted_in_users_csv(date=None):
 '''
 Returns an HTTP response to an HTTP request containing a csv file
 that cointains meta data on Badgr users who have opted in for
-marketing.
+marketing. Expects a '?date=DATE' query paremetr where DATE is
+a string of the form 'YEAR-MONTH-DAY'
 @param request rest_framework.request.Request
 @return django.http.HttpResponse
 '''

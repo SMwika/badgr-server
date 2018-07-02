@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django.conf.urls import url
 
-from badgeuser.api_v1 import marketing_opted_in_users_csv_view
 from badgeuser.api import BadgeUserToken, BadgeUserForgotPassword, BadgeUserEmailConfirm, BadgeUserDetail, \
     AccessTokenList, AccessTokenDetail
 
@@ -18,5 +17,4 @@ urlpatterns = [
 
     url(r'^users/(?P<entity_id>self)$', BadgeUserDetail.as_view(), name='v2_api_user_self'),
     url(r'^users/(?P<entity_id>[^/]+)$', BadgeUserDetail.as_view(), name='v2_api_user_detail'),
-    url(r'^users/opted-marketing$', marketing_opted_in_users_csv_view),
 ]

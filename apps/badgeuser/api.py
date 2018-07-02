@@ -1,5 +1,4 @@
 import re
-import csv
 
 from allauth.account.adapter import get_adapter
 from allauth.account.models import EmailConfirmationHMAC
@@ -11,7 +10,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.core.urlresolvers import reverse
 from django.http import Http404
-from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import permissions, serializers
 from rest_framework.exceptions import ValidationError as RestframeworkValidationError
