@@ -5,6 +5,8 @@ from mainsite.admin import badgr_admin
 
 from .models import BadgeUser, EmailAddressVariant, TermsVersion, TermsAgreement
 
+from .api_v1 import marketing_opted_in_users_csv_view
+
 
 class ExternalToolInline(TabularInline):
     model = ExternalToolUserActivation

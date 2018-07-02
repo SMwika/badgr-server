@@ -6,6 +6,8 @@ from django.template.loader import get_template
 
 from allauth.account.adapter import get_adapter
 
+from badgeuser.models import BadgeUser
+
 
 def notify_on_password_change(user, request=None):
     """

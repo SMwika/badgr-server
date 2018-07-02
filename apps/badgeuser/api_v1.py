@@ -1,11 +1,19 @@
 # encoding: utf-8
 from __future__ import unicode_literals
 
+import csv
+import aniso8601
+import datetime
+
+from django.http import HttpResponse
+
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework import permissions
 
-from badgeuser.models import CachedEmailAddress
+from badgeuser.models import CachedEmailAddress, BadgeUser
 from badgeuser.serializers_v1 import EmailSerializerV1
 from apispec_drf.decorators import apispec_list_operation, apispec_post_operation, apispec_operation, \
     apispec_get_operation, apispec_delete_operation, apispec_put_operation
@@ -116,3 +124,64 @@ class BadgeUserEmailDetail(BadgeUserEmailView):
         serializer = EmailSerializerV1(email_address, context={'request': request})
         serialized = serializer.data
         return Response(serialized, status=status.HTTP_200_OK)
+
+'''
+Helper that handles creating an HttpResponse containing a csv file
+that cointains meta data on Badgr users who have opted in for
+marketing.
+
+@param datetime.date object
+@return django.http.HttpResponse
+'''
+def get_marketing_opted_in_users_csv(date=None):
+    opted_in_users = []
+    if date == None:
+        opted_in_users = BadgeUser.objects.filter(marketing_opt_in=True)
+        date = "ALL"
+    else:
+        search_date = datetime.datetime.combine(date, datetime.datetime.min.time())
+        search_date -= datetime.timedelta(days=1)
+        opted_in_users = BadgeUser.objects.filter(marketing_opt_in=True, date_joined__gte=search_date)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="marketing_opted_in_users_%s.csv"' % date
+    fieldnames = ['date', 'opt_in', 'email', 'first_name', 'last_name']
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+
+    writer.writeheader()
+    for user in opted_in_users:
+        date_joined = user.date_joined
+        opt_in = "True"
+        email = user.primary_email
+        first_name = user.first_name
+        last_name = user.last_name
+        writer.writerow({'date': date_joined, 'opt_in': opt_in, 'email': email,
+         'first_name': first_name, 'last_name': last_name})
+
+    return response
+
+
+'''
+Returns an HTTP response to an HTTP request containing a csv file
+that cointains meta data on Badgr users who have opted in for
+marketing.
+@param request rest_framework.request.Request
+@return django.http.HttpResponse
+'''
+@api_view(['GET'])
+@permission_classes((permissions.IsAuthenticated,))
+def marketing_opted_in_users_csv_view(request, **kwargs):
+    query_dict = request.GET
+    date = None
+    if 'date' in query_dict:
+        date = query_dict['date']
+        print("init query param")
+        print(date)
+
+        try:
+            date = aniso8601.parse_date(date)
+        except:
+            return Response({'error': "Incorrect date format. Expected date to be in datetime.date format."}, status=status.HTTP_400_BAD_REQUEST)
+
+    response = get_marketing_opted_in_users_csv(date=date)
+    return response
