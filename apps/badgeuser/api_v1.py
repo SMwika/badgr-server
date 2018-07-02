@@ -164,7 +164,7 @@ def get_marketing_opted_in_users_csv(date=None):
 '''
 Returns an HTTP response to an HTTP request containing a csv file
 that cointains meta data on Badgr users who have opted in for
-marketing. Expects a '?date=DATE' query paremetr where DATE is
+marketing. Expects a '?date=DATE' query paremeter where DATE is
 a string of the form 'YEAR-MONTH-DAY'
 @param request rest_framework.request.Request
 @return django.http.HttpResponse
@@ -176,8 +176,6 @@ def marketing_opted_in_users_csv_view(request, **kwargs):
     date = None
     if 'date' in query_dict:
         date = query_dict['date']
-        print("init query param")
-        print(date)
 
         try:
             date = aniso8601.parse_date(date)
