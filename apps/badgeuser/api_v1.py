@@ -170,7 +170,7 @@ a string of the form 'YEAR-MONTH-DAY'
 @return django.http.HttpResponse
 '''
 @api_view(['GET'])
-@permission_classes((permissions.IsAuthenticated,))
+@permission_classes((permissions.IsAdminUser,))
 def marketing_opted_in_users_csv_view(request, **kwargs):
     query_dict = request.GET
     date = None
@@ -184,3 +184,36 @@ def marketing_opted_in_users_csv_view(request, **kwargs):
 
     response = get_marketing_opted_in_users_csv(date=date)
     return response
+
+class MarketingUsersCSV(APIView):
+    """
+    View to get a csv file
+    that cointains meta data on Badgr users who have opted in for
+    marketing.
+
+    * Only admin users are able to access this view.
+    """
+    permission_classes = (permissions.IsAdminUser,)
+
+    """
+    Returns an HTTP response to an HTTP request containing a csv file
+    that cointains meta data on Badgr users who have opted in for
+    marketing. Expects a '?date=DATE' query paremeter where DATE is
+    a string of the form 'YEAR-MONTH-DAY'
+    @param request rest_framework.request.Request
+    @return django.http.HttpResponse
+    """
+    def get(self, request, format=None):
+        query_dict = request.GET
+        print(query_dict)
+        date = None
+        if 'date' in query_dict:
+            date = query_dict['date']
+
+            try:
+                date = aniso8601.parse_date(date)
+            except:
+                return Response({'error': "Incorrect date format. Expected date to be in datetime.date format."}, status=status.HTTP_400_BAD_REQUEST)
+
+        response = get_marketing_opted_in_users_csv(date=date)
+        return response
