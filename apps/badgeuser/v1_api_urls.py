@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
 from badgeuser.api import BadgeUserToken, BadgeUserForgotPassword, BadgeUserEmailConfirm, BadgeUserDetail
-from badgeuser.api_v1 import BadgeUserEmailList, BadgeUserEmailDetail, marketing_opted_in_users_csv_view, MarketingUsersCSV
+from badgeuser.api_v1 import BadgeUserEmailList, BadgeUserEmailDetail, MarketingUsersCSV
 
 urlpatterns = [
     url(r'^auth-token$', BadgeUserToken.as_view(), name='v1_api_user_auth_token'),

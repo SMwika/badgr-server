@@ -635,3 +635,21 @@ class UserProfileTests(BadgrTestCase):
         if user_pk is not None:
             self.assertEqual(self.client.session[SESSION_KEY], user_pk)
 
+class MarketingOptedUsersTests(BadgrTestCase):
+    def test_staff_can_download_csv(self):
+        email = "email123@test.com"
+        test_user = self.setup_user(email=email, authenticate=True)
+        test_user.is_staff = True
+        test_user.save()
+
+        response = self.client.get('/v1/user/opted-marketing?date=2018-06-13')
+
+        self.assertEqual(response.status_code, 200)
+
+    def user_who_isnt_staff_cannot_download(self):
+        email = "email123@test.com"
+        test_user = self.setup_user(email=email, authenticate=True)
+
+        response = self.client.get('/v1/user/opted-marketing?date=2018-06-13')
+
+        self.assertEqual(response.status_code, 403)
