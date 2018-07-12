@@ -92,7 +92,7 @@ def correct_issued_on_imported_assertions(self):
     assertions = BadgeInstance.objects.filter(source_url__isnull=False)
     updated_assertions = []
     for a in assertions:
-        result = compare_issued_and_created_dates_for_assertion(a)
+        result = compare_issued_and_created_dates_for_assertion.delay(a)
         if result['updated']:
             updated_assertions.append(a)
 
